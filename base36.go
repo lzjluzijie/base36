@@ -1,7 +1,6 @@
 package base36
 
 import (
-	"errors"
 	"math/big"
 )
 
@@ -51,8 +50,8 @@ var (
 	bigZero  = big.NewInt(0)
 )
 
-//Encode source bytes to base36 bytes
-func Encode(b []byte) []byte {
+//Encode source bytes to base36 string
+func Encode(b []byte) string {
 	x := new(big.Int)
 	x.SetBytes(b)
 
@@ -63,23 +62,16 @@ func Encode(b []byte) []byte {
 		answer = append(answer, alphabet[mod.Int64()])
 	}
 
-	for _, i := range b {
-		if i != 0 {
-			break
-		}
-		answer = append(answer, alphabet[0])
-	}
-
 	alen := len(answer)
 	for i := 0; i < alen/2; i++ {
 		answer[i], answer[alen-1-i] = answer[alen-1-i], answer[i]
 	}
 
-	return answer
+	return string(answer)
 }
 
 //Decode base36 bytes to source bytes
-func Decode(b string) ([]byte, error) {
+func Decode(b string) []byte {
 	answer := big.NewInt(0)
 	j := big.NewInt(1)
 
@@ -87,8 +79,7 @@ func Decode(b string) ([]byte, error) {
 	for i := len(b) - 1; i >= 0; i-- {
 		tmp := b36[b[i]]
 		if tmp == 255 {
-			err := errors.New("Not base36 text")
-			return nil, err
+			return nil
 		}
 		scratch.SetInt64(int64(tmp))
 		scratch.Mul(j, scratch)
@@ -108,5 +99,5 @@ func Decode(b string) ([]byte, error) {
 	val := make([]byte, flen)
 	copy(val[numZeros:], tmpval)
 
-	return val, nil
+	return val
 }
